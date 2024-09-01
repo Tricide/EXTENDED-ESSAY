@@ -2,18 +2,18 @@ from pmlb import fetch_data, classification_dataset_names
 from sklearn import svm
 from sklearn.model_selection import train_test_split, GridSearchCV
 from sklearn.metrics import confusion_matrix, accuracy_score, recall_score, f1_score, precision_score, balanced_accuracy_score, roc_auc_score, roc_curve, auc, precision_recall_curve
-from sklearn.decomposition import KernelPCA, PCA
+
 
 import matplotlib.pyplot as plt
 import seaborn as sb
 import openpyxl
+
+import time
 ##for ease of use
 class supportVector:
     
     def __init__(self, kernel_type, c, gamma, degree):
-        self.svm1 = svm.SVC(kernel = kernel_type, cache_size = 1000, probability = True)
-        self.pca = PCA(n_component=2)
-        self.kernel_pca = KernelPCA(n_components = 2, kernel = 'rbf')
+        self.svm1 = svm.SVC(kernel = kernel_type, cache_size = 1000, probability = True, )
         self.matrix = []
         self.predictions = []
         self.PCAPredictions = []
@@ -42,9 +42,9 @@ class supportVector:
     
         
         
-datasets = ["banana" '''"clean2", "parity5", "adult", "GAMETES_Epistasis_2_Way_1000atts_0.4H_EDM_1_EDM_1_1";''']        
-gammaValues = [0.001, 0.01, 0.1, 1, 10, 100, 1000, 10000]
-cValues = [0.001, 0.01, 0.1, 1, 10, 100, 1000, 10000]
+datasets = ["banana", "clean2", "parity5", "adult", "GAMETES_Epistasis_2_Way_1000atts_0.4H_EDM_1_EDM_1_1"]        
+gammaValues = [0.001, 0.01, 0.1, 1, 10, 100]
+cValues = [0.001, 0.01, 0.1, 1, 10, 100]
 degreeValues = [2,3,4,5,6,7,8,9,10,11]
 
 supportVectorArray = []
@@ -60,27 +60,28 @@ for c in cValues:
             polynomial_svm = supportVector('polynomial', c, gamma, degree)
             supportVectorArray.append(polynomial_svm)
             
-            
-                     
-for dataset in datasets:
+         
+      
+def run(supportVectorMachine):            
+    for dataset in datasets:
+        
+        ##preparing the data
+        X,y = fetch_data(dataset, return_X_y=True)
 
-    ##preparing the data
-    X,y = fetch_data(dataset, return_X_y=True)
+        train_X, test_X, train_y, test_y = train_test_split(X,y)
 
-    train_X, test_X, train_y, test_y = train_test_split(X,y)
-
-    ##training the models
-    for svmachine in supportVectorArray:
-        svmachine.svm1.fit(train_X, train_y)    
+        ##training the models
+        start = time.time()
+        supportVectorMachine.svm1.fit(train_X, train_y)    
         
         ##predict, test, and create confusion matrix
-        svmachine.predictf(test_X, test_y)
+        supportVectorMachine.predictf(test_X, test_y)
+        
+        wb = openpyxl.load_workbook(r"C:\Users\Tricide\Documents\School\EXTENDED ESSAY\Data.xlsx")
+        ws = wb.active
     
-    wb = openpyxl.load_workbook(r"C:\Users\Tricide\Documents\School\EXTENDED ESSAY\Data.xlsx")
-    ws = wb.active
-    for svmachine in supportVectorArray:
         # Compute fpr, tpr, thresholds and roc auc
-        fpr, tpr, thresholds = roc_curve(test_y, svmachine.probabilities[:,1])
+        fpr, tpr, thresholds = roc_curve(test_y, supportVectorMachine.probabilities[:,1])
         roc_auc = auc(fpr, tpr)
         
         # Plot ROC curve
@@ -92,41 +93,43 @@ for dataset in datasets:
         plt.ylabel('True Positive Rate or (Sensitivity)')
         plt.title('Receiver Operating Characteristic')
         plt.legend(loc="lower right")
-        if (svmachine.svm1.kernel == 'linear'):
-            plt.savefig("ROC/{data}_{model}_{c}_roc_graph.png".format(data = dataset, model = svmachine.svm1.kernel, c = svmachine.svm1.C))
-        if (svmachine.svm1.kernel == 'rbf' or svmachine.svm1.kernel == 'sigmoid'):
-            plt.savefig("ROC/{data}_{model}_{c}_{g}_roc_graph.png".format(data = dataset, model = svmachine.svm1.kernel,c = svmachine.svm1.C, g =svmachine.svm1.gamma))
-        if (svmachine.svm1.kernel == 'polynomial'):
-            plt.savefig("ROC/{data}_{model}_{c}_{g}_{d}_roc_graph.png".format(data = dataset, model = svmachine.svm1.kernel,c = svmachine.svm1.C, g =svmachine.svm1.gamma, d = svmachine.svm1.degree))
+        if (supportVectorMachine.svm1.kernel == 'linear'):
+            plt.savefig("ROC/{data}_{model}_{c}_roc_graph.png".format(data = dataset, model = supportVectorMachine.svm1.kernel, c = supportVectorMachine.svm1.C))
+        if (supportVectorMachine.svm1.kernel == 'rbf' or supportVectorMachine.svm1.kernel == 'sigmoid'):
+            plt.savefig("ROC/{data}_{model}_{c}_{g}_roc_graph.png".format(data = dataset, model = supportVectorMachine.svm1.kernel,c = supportVectorMachine.svm1.C, g =supportVectorMachine.svm1.gamma))
+        if (supportVectorMachine.svm1.kernel == 'polynomial'):
+            plt.savefig("ROC/{data}_{model}_{c}_{g}_{d}_roc_graph.png".format(data = dataset, model = supportVectorMachine.svm1.kernel,c = supportVectorMachine.svm1.C, g =supportVectorMachine.svm1.gamma, d = supportVectorMachine.svm1.degree))
         plt.clf()
         
         
         #Plot PR Curve
         
-        precision, recall, threshold = precision_recall_curve(test_y, svmachine.probabilities[:,1])
+        precision, recall, threshold = precision_recall_curve(test_y, supportVectorMachine.probabilities[:,1])
         plt.fill_between(recall, precision)
         plt.ylabel("Precision")
         plt.xlabel("Recall")
         plt.title("Precision-Recall curve")
-        if (svmachine.svm1.kernel == 'linear'):
-            plt.savefig("ROC/{data}_{model}_{c}_prc_graph.png".format(data = dataset, model = svmachine.svm1.kernel, c = svmachine.svm1.C))
-        if (svmachine.svm1.kernel == 'rbf' or svmachine.svm1.kernel == 'sigmoid'):
-            plt.savefig("ROC/{data}_{model}_{c}_{g}_prc_graph.png".format(data = dataset, model = svmachine.svm1.kernel,c = svmachine.svm1.C, g =svmachine.svm1.gamma))
-        if (svmachine.svm1.kernel == 'polynomial'):
-            plt.savefig("ROC/{data}_{model}_{c}_{g}_{d}_prc_graph.png".format(data = dataset, model = svmachine.svm1.kernel,c = svmachine.svm1.C, g =svmachine.svm1.gamma, d = svmachine.svm1.degree))
+        if (supportVectorMachine.svm1.kernel == 'linear'):
+            plt.savefig("PRC/{data}_{model}_{c}_prc_graph.png".format(data = dataset, model = supportVectorMachine.svm1.kernel, c = supportVectorMachine.svm1.C))
+        if (supportVectorMachine.svm1.kernel == 'rbf' or supportVectorMachine.svm1.kernel == 'sigmoid'):
+            plt.savefig("PRC/{data}_{model}_{c}_{g}_prc_graph.png".format(data = dataset, model = supportVectorMachine.svm1.kernel,c = supportVectorMachine.svm1.C, g =supportVectorMachine.svm1.gamma))
+        if (supportVectorMachine.svm1.kernel == 'polynomial'):
+            plt.savefig("PRC/{data}_{model}_{c}_{g}_{d}_prc_graph.png".format(data = dataset, model = supportVectorMachine.svm1.kernel,c = supportVectorMachine.svm1.C, g =supportVectorMachine.svm1.gamma, d = supportVectorMachine.svm1.degree))
         
         
         plt.clf()
+        end = time.time()
+        ws.append((dataset, supportVectorMachine.svm1.kernel, supportVectorMachine.svm1.C, supportVectorMachine.svm1.gamma, supportVectorMachine.svm1.degree, supportVectorMachine.tests["f1score"], "{data}_{model}_roc_graph.png".format(data = dataset, model = supportVectorMachine.svm1.kernel), "{data}_{model}_prc_graph.png".format(data = dataset, model = supportVectorMachine.svm1.kernel),supportVectorMachine.tests["accuracy"], supportVectorMachine.tests["balancedAccuracy"], supportVectorMachine.tests["specificity"], supportVectorMachine.tests["precision"], supportVectorMachine.tests["recall"], ','.join(map(str, supportVectorMachine.matrix)), end-start))
         
-        ws.append((dataset, svmachine.svm1.kernel, svmachine.tests["f1score"], "{data}_{model}_roc_graph.png".format(data = dataset, model = svmachine.svm1.kernel), "{data}_{model}_prc_graph.png".format(data = dataset, model = svmachine.svm1.kernel),svmachine.tests["accuracy"], svmachine.tests["balancedAccuracy"], svmachine.tests["specificity"], svmachine.tests["precision"], svmachine.tests["recall"], ','.join(map(str, svmachine.matrix))))
-        
-    wb.save("Data.xlsx")
-    '''
-    sb.boxplot(data=[[supportVectorArray[0].tests["accuracy"]], [supportVectorArray[1].tests["accuracy"]], [supportVectorArray[2].tests["accuracy"]], [supportVectorArray[3].tests["accuracy"]]], notch=True)
-    plt.xticks([0, 1,2,3], ['RBFSVM', 'PolynomialSVM', 'LinearSVM', 'SigmoidSVM'])
-    plt.ylabel('Test Accuracy')
-    plt.savefig("ModelComparison/{}_ModelComparisons.png".format(dataset))
-    '''
+        wb.save("Data.xlsx")
+for svm2 in supportVectorArray:
+    run(svm2)            
+'''
+sb.boxplot(data=[[supportVectorArray[0].tests["accuracy"]], [supportVectorArray[1].tests["accuracy"]], [supportVectorArray[2].tests["accuracy"]], [supportVectorArray[3].tests["accuracy"]]], notch=True)
+plt.xticks([0, 1,2,3], ['RBFSVM', 'PolynomialSVM', 'LinearSVM', 'SigmoidSVM'])
+plt.ylabel('Test Accuracy')
+plt.savefig("ModelComparison/{}_ModelComparisons.png".format(dataset))
+'''
     
     #representation of hyperplane and data
     
