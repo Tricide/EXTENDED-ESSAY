@@ -140,7 +140,7 @@ def run(supportVectorMachine, X, y, dataset):
     #    plotDecisionSurface(X, estimator, y, supportVectorMachine, dataset)
     
     #open excel sheet
-    wb = openpyxl.load_workbook(r"C:\Users\Tricide\Documents\School\EXTENDED ESSAY\Data.xlsx")
+    wb = openpyxl.load_workbook(r"/workspaces/EXTENDED-ESSAY/Data.xlsx")
     ws = wb.active
     ##append data to excel sheet
     ws.append((dataset, supportVectorMachine.svm1.kernel, supportVectorMachine.svm1.C, supportVectorMachine.svm1.gamma, supportVectorMachine.svm1.degree, supportVectorMachine.svm1.coef0, supportVectorMachine.tests["f1score"], roc_auc, "{data}_{model}_roc_graph.png".format(data = dataset, model = supportVectorMachine.svm1.kernel), "{data}_{model}_prc_graph.png".format(data = dataset, model = supportVectorMachine.svm1.kernel),supportVectorMachine.tests["accuracy"], supportVectorMachine.tests["balancedAccuracy"], supportVectorMachine.tests["specificity"], supportVectorMachine.tests["precision"], supportVectorMachine.tests["recall"], ','.join(map(str, supportVectorMachine.matrix)), end-start))
@@ -151,7 +151,7 @@ def run(supportVectorMachine, X, y, dataset):
 ##all values to be tested        
 datasets = ["banana", "clean2", "parity5",  "GAMETES_Epistasis_2_Way_1000atts_0.4H_EDM_1_EDM_1_1"]       
 sampleAmounts = [100, 1000, 10000]
-features  = [10, 100, 1000]
+features  = [1000]
 informativeFeatures = [.1,.25, .5, .75, 1] ##probably will not be used
 gammaValues = [0.001, 0.01, 0.1, 1, 10]
 cValues = [0.001, 0.01, 0.1, 1, 10]
@@ -161,8 +161,10 @@ shiftValues = [0.001, 0.01, 0.1, 1, 10]
 
 for feature in features:
     for amount in sampleAmounts:
+        randomState = np.random.random_integers(0,1000)
         X_in, y_in = make_classification(n_samples = amount, n_features = feature, n_informative = feature, n_redundant = 0)
         dataset = "synthetic_{amount}_{features}".format(amount = amount, features = feature)
+        print("{num} samples in {state} randomState".format(num = amount, state = randomState))
         for c in cValues:
             linear_svm = supportVector('linear', c, 0, 3, 0)
             run(linear_svm, X_in, y_in, dataset)
@@ -175,9 +177,9 @@ for feature in features:
                     sig_svm = supportVector('sigmoid', c, gamma, 3, shift)
                     run(sig_svm, X_in, y_in, dataset)
                     
-            for degree in degreeValues:
-                polynomial_svm = supportVector('poly', c, 1, degree, 0)
-                run(polynomial_svm, X_in, y_in, dataset)
+            #for degree in degreeValues:
+            #    polynomial_svm = supportVector('poly', c, 1, degree, 0)
+            #    run(polynomial_svm, X_in, y_in, dataset)
 
 for dataset in datasets:
     x_in, y_in = fetch_data(dataset, return_X_y=True)
