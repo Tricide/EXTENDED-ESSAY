@@ -140,7 +140,7 @@ def run(supportVectorMachine, X, y, dataset):
     #    plotDecisionSurface(X, estimator, y, supportVectorMachine, dataset)
     
     #open excel sheet
-    wb = openpyxl.load_workbook(r"/workspaces/EXTENDED-ESSAY/Data.xlsx")
+    wb = openpyxl.load_workbook(r"C:\Users\Tricide\Documents\School\EXTENDED ESSAY\Data.xlsx")
     ws = wb.active
     ##append data to excel sheet
     ws.append((dataset, supportVectorMachine.svm1.kernel, supportVectorMachine.svm1.C, supportVectorMachine.svm1.gamma, supportVectorMachine.svm1.degree, supportVectorMachine.svm1.coef0, supportVectorMachine.tests["f1score"], roc_auc, "{data}_{model}_roc_graph.png".format(data = dataset, model = supportVectorMachine.svm1.kernel), "{data}_{model}_prc_graph.png".format(data = dataset, model = supportVectorMachine.svm1.kernel),supportVectorMachine.tests["accuracy"], supportVectorMachine.tests["balancedAccuracy"], supportVectorMachine.tests["specificity"], supportVectorMachine.tests["precision"], supportVectorMachine.tests["recall"], ','.join(map(str, supportVectorMachine.matrix)), end-start))
