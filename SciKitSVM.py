@@ -150,12 +150,12 @@ def run(supportVectorMachine, X, y, dataset):
     
 ##all values to be tested        
 datasets = ["banana", "clean2", "parity5",  "GAMETES_Epistasis_2_Way_1000atts_0.4H_EDM_1_EDM_1_1"]       
-sampleAmounts = [100, 1000, 10000]
-features  = [1000]
+sampleAmounts = [10000] #10, 100, 1000 Completed
+features  = [1000] #10, 100, 1000 Completed
 informativeFeatures = [.1,.25, .5, .75, 1] ##probably will not be used
 gammaValues = [0.001, 0.01, 0.1, 1, 10]
-cValues = [0.001, 0.01, 0.1, 1, 10]
-degreeValues = [2,3,4]
+cValues = [0.001, 0.01, 0.1, 1, 10] 
+degreeValues = [2,3,4] #ignored at values above 10000
 shiftValues = [0.001, 0.01, 0.1, 1, 10]
 
 
