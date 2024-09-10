@@ -48,8 +48,10 @@ def plotPRCGraph(svm2, dataset, test_y):
     plt.title("Precision-Recall curve")
     if (svm2.svm1.kernel == 'linear'):
         plt.savefig("PRC/{data}_{model}_{c}_prc_graph.png".format(data = dataset, model = svm2.svm1.kernel, c = svm2.svm1.C))
-    if (svm2.svm1.kernel == 'rbf' or svm2.svm1.kernel == 'sigmoid'):
+    if (svm2.svm1.kernel == 'rbf'):
         plt.savefig("PRC/{data}_{model}_{c}_{g}_prc_graph.png".format(data = dataset, model = svm2.svm1.kernel,c = svm2.svm1.C, g =svm2.svm1.gamma))
+    if (svm2.svm1.kernel == "sigmoid"):
+        plt.savefig("PRC/{data}_{model}_{c}_{g}_{s}_prc_graph.png".format(data = dataset, model = svm2.svm1.kernel,c = svm2.svm1.C, g =svm2.svm1.gamma, s = svm2.svm1.coef0))
     if (svm2.svm1.kernel == 'poly'):
         plt.savefig("PRC/{data}_{model}_{c}_{g}_{d}_prc_graph.png".format(data = dataset, model = svm2.svm1.kernel,c = svm2.svm1.C, g =svm2.svm1.gamma, d = svm2.svm1.degree))
     plt.clf()
@@ -69,8 +71,10 @@ def plotROCGraph(svm2, dataset, test_y):
     plt.legend(loc="lower right")
     if (svm2.svm1.kernel == 'linear'):
         plt.savefig("ROC/{data}_{model}_{c}_roc_graph.png".format(data = dataset, model = svm2.svm1.kernel, c = svm2.svm1.C))
-    if (svm2.svm1.kernel == 'rbf' or svm2.svm1.kernel == 'sigmoid'):
+    if (svm2.svm1.kernel == 'rbf'):
         plt.savefig("ROC/{data}_{model}_{c}_{g}_roc_graph.png".format(data = dataset, model = svm2.svm1.kernel,c = svm2.svm1.C, g =svm2.svm1.gamma))
+    if (svm2.svm1.kernel == "sigmoid"):
+        plt.savefig("ROC/{data}_{model}_{c}_{g}_{s}_roc_graph.png".format(data = dataset, model = svm2.svm1.kernel,c = svm2.svm1.C, g =svm2.svm1.gamma, s = svm2.svm1.coef0))
     if (svm2.svm1.kernel == 'poly'):
         plt.savefig("ROC/{data}_{model}_{c}_{g}_{d}_roc_graph.png".format(data = dataset, model = svm2.svm1.kernel,c = svm2.svm1.C, g =svm2.svm1.gamma, d = svm2.svm1.degree))
     plt.clf()
@@ -109,8 +113,10 @@ def plotDecisionSurface(X, estimator, y, svm2, dataset):
     ax.legend()
     if (svm2.svm1.kernel == 'linear'):
         plt.savefig("DecisionBoundary/{data}_{model}_{c}_DecisionBoundary_graph.png".format(data = dataset, model = svm2.svm1.kernel, c = svm2.svm1.C))
-    if (svm2.svm1.kernel == 'rbf' or svm2.svm1.kernel == 'sigmoid'):
+    if (svm2.svm1.kernel == 'rbf'):
         plt.savefig("DecisionBoundary/{data}_{model}_{c}_{g}_DecisionBoundary_graph.png".format(data = dataset, model = svm2.svm1.kernel,c = svm2.svm1.C, g =svm2.svm1.gamma))
+    if (svm2.svm1.kernel == "sigmoid"):
+        plt.savefig("DecisionBoundary/{data}_{model}_{c}_{g}_{s}_DecisionBoundary_graph.png".format(data = dataset, model = svm2.svm1.kernel,c = svm2.svm1.C, g =svm2.svm1.gamma, s = svm2.svm1.coef0))
     if (svm2.svm1.kernel == 'poly'):
         plt.savefig("DecisionBoundary/{data}_{model}_{c}_{g}_{d}_DecisionBoundary_graph.png".format(data = dataset, model = svm2.svm1.kernel,c = svm2.svm1.C, g =svm2.svm1.gamma, d = svm2.svm1.degree))
     plt.clf()
@@ -158,7 +164,7 @@ cValues = [0.001, 0.01, 0.1, 1, 10]
 degreeValues = [2,3,4] #ignored at values above 10000
 shiftValues = [0.001, 0.01, 0.1, 1, 10]
 
-
+'''
 for feature in features:
     for amount in sampleAmounts:
         randomState = np.random.random_integers(0,1000)
@@ -180,24 +186,24 @@ for feature in features:
             #for degree in degreeValues:
             #    polynomial_svm = supportVector('poly', c, 1, degree, 0)
             #    run(polynomial_svm, X_in, y_in, dataset)
-
+'''
 for dataset in datasets:
     x_in, y_in = fetch_data(dataset, return_X_y=True)
     for c in cValues:
             linear_svm = supportVector('linear', c, 0, 3, 0)
-            run(linear_svm, X_in, y_in, dataset)
+            run(linear_svm, x_in, y_in, dataset)
             
             for gamma in gammaValues:
                 rbf_svm = supportVector('rbf', c, gamma, 3 ,0)
-                run(rbf_svm, X_in, y_in, dataset)
+                run(rbf_svm, x_in, y_in, dataset)
                 
                 for shift in shiftValues:
                     sig_svm = supportVector('sigmoid', c, gamma, 3, shift)
-                    run(sig_svm, X_in, y_in, dataset)
+                    run(sig_svm, x_in, y_in, dataset)
                     
             for degree in degreeValues:
                 polynomial_svm = supportVector('poly', c, 1, degree, 0)
-                run(polynomial_svm, X_in, y_in, dataset)
+                run(polynomial_svm, x_in, y_in, dataset)
 
 
 ##X_in,y_in = fetch_data("banana", return_X_y=True)
